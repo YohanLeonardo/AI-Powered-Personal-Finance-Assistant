@@ -68,7 +68,7 @@ def budget():
         categories = ['Needs', 'Wants', 'Savings']
         new_budgets = {cat: float(request.form.get(cat, 0)) for cat in categories}
         
-        # Capture optional income for higher fidelity context
+        # Get optional income value
         income_val = request.form.get('income')
         if income_val:
             new_budgets['income'] = float(income_val)
@@ -119,7 +119,7 @@ def savings():
         return redirect(url_for('savings'))
         
     goals = data_manager.get_savings_goals()
-    # Dynamically update current_amount of all goals to reflect the active saldo
+    # Update current amount for each goal to reflect active balance
     for goal in goals:
         goal['current_amount'] = saldo
         
@@ -134,8 +134,7 @@ def complete_goal(goal_idx):
         target_amount = goal.get('target_amount', 0)
         goal_name = goal.get('goal_name', 'Unnamed Goal')
         
-        # When goal is complete, we must deduct the target money from active balance.
-        # We save a transaction under category 'Needs' (non-Savings) so the math in app.py automatically decreases the total balance.
+        # Deduct target amount from balance by saving a transaction
         data_manager.save_transaction({
             'description': f"Completed Goal: {goal_name}",
             'amount': target_amount,
@@ -218,11 +217,11 @@ def ai_advisor():
     if request.is_json:
         user_query = request.json.get('message')
         
-        # Load high-fidelity context
+        # Load data context
         budgets = data_manager.get_budgets()
         transactions = data_manager.get_transactions()
         
-        # Query the updated LLM function with context
+        # Get advice from LLM
         ai_response = llm_utils.get_personalized_advice(user_query, budgets, transactions)
         
         return jsonify({"response": ai_response})

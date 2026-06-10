@@ -7,22 +7,19 @@ from dotenv import load_dotenv
 # Load environment variables from .env
 load_dotenv()
 
-# Initialize the new GenAI client using the key from .env
-# The client automatically looks for the GEMINI_API_KEY environment variable,
-# but passing it explicitly is a safe practice.
+# Initialize the GenAI client
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def get_personalized_advice(query, budgets, transactions):
     """
     Generates personalized financial advice and What-If simulations.
-    Strictly utilizes Gemini (gemini-3.1-flash-lite) via the new google.genai SDK.
     """
     try:
-        # Convert data structures to JSON strings so the LLM can easily parse them
+        # Convert data structures to JSON strings
         budget_context = json.dumps(budgets, indent=2)
         transaction_context = json.dumps(transactions, indent=2)
         
-        # Assemble the System Prompt according to the Implementation Plan
+        # System instructions for the advisor
         system_prompt = f"""
         You are a smart, assertive, and highly solution-oriented AI Financial Advisor.
         
@@ -37,7 +34,7 @@ def get_personalized_advice(query, budgets, transactions):
         4. FORMATTING: Maximize the use of Markdown. Use tables for numerical breakdowns, bullet points for lists, and **bold** text for important metrics or warnings to ensure high readability on the web interface.
         """
         
-        # Execute the user's prompt using the new client.models.generate_content structure
+        # Get response from Gemini
         response = client.models.generate_content(
             model='gemini-3.1-flash-lite',
             contents=query,
