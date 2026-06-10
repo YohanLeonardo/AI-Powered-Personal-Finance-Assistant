@@ -1,69 +1,81 @@
 # Technical Documentation: AI Personal Finance Assistant
 
 ## 1. Introduction
-This application is a local-first personal finance tracker and planner powered by Gemini AI. It helps users input daily expenses, plan category budgets, and save for specific goals while getting advice from an AI agent.
+This project is a simple personal finance tracker app. It runs locally and uses Gemini AI to give financial advice. Users can input their daily transactions, set budget limits, and make savings goals.
 
 ### Project Goals
-- Make budgeting easy.
-- Provide charts that show financial status.
-- Integrate Gemini AI to recommend budgets, give investment strategies, and answer financial questions.
-- Support completing savings goals, which automatically records a transaction to decrease the active balance.
+- Help users do budgeting easily.
+- Show charts for spending overview.
+- Use Gemini AI to give budget recommendation, investment advice, and answer questions.
+- Automatically add expense transaction when user finishes a savings goal.
 
 ## 2. Technical Stack
 - **Backend:** Python 3.11 with Flask framework.
-- **Frontend:** HTML5, CSS3, FontAwesome, JavaScript, and custom styling based on template layouts.
-- **AI Engine:** Gemini API via python-based SDK helper.
-- **Charts:** Matplotlib (rendered to Base64 image strings to display dynamically in HTML).
-- **Database:** Local JSON files located in the `data/` directory (`budgets.json`, `transactions.json`, `savings_goals.json`).
+- **Frontend:** HTML, CSS, JavaScript, and FontAwesome for icons.
+- **AI Integration:** Google GenAI SDK (using gemini-3.1-flash-lite).
+- **Charts:** Matplotlib (saved as PNG files in static folder).
+- **Data Storage:** Local JSON files (`data/budgets.json`, `data/transactions.json`, and `data/savings_goals.json`).
 
 ## 3. Directory Structure
+Here is how the project files are organized:
 ```text
 personal_finance_assistant/
-├── app.py                     # Main Flask application with all routes
-├── requirements.txt           # Python dependency packages list
+├── app.py                     # Main Flask routes and server logic
+├── requirements.txt           # Python packages needed
+├── .gitignore                 # Files to ignore in Git (like secrets and cache)
 ├── utils/
-│   ├── data_manager.py        # Read/Write helper for local JSON databases
-│   ├── llm_utils.py           # Gemini API wrappers and prompt configurations
-│   └── visualization_utils.py # Matplotlib pie chart and comparison chart logic
+│   ├── data_manager.py        # Read and write to JSON files
+│   ├── llm_utils.py           # Gemini API setup and prompts
+│   └── visualization_utils.py # Chart generation using Matplotlib
 ├── static/
 │   ├── css/
-│   │   ├── main.css           # Global layout stylesheet (with custom resets)
-│   │   └── chatbot.css        # Specific chatbot layout styling
+│   │   ├── main.css           # Global website styling
+│   │   └── chatbot.css        # Chat page styling
 │   └── js/
-│       └── main.js            # General frontend javascript behavior
+│       └── main.js            # Frontend JavaScript behavior
 └── templates/
-    ├── layout.html            # Core HTML base template (header, navigation menu)
-    ├── index.html             # Homepage dashboard showing active saldo and charts
-    ├── budget.html            # Category budget planning page
-    ├── savings.html           # Savings goal listing and investment guidance page
-    ├── chatbot.html           # Conversational AI chatbot UI
-    └── report.html            # Printable HTML financial report layout
+    ├── layout.html            # Main base layout template
+    ├── index.html             # Dashboard with transactions and charts
+    ├── budget.html            # Page to set budget and get AI recommendations
+    ├── savings.html           # Savings page with goals list
+    ├── chatbot.html           # Chatbot helper interface
+    └── report.html            # Financial report page for printing
 ```
 
-## 4. Key Logic Implementations
+## 4. Key Logic and Features
 
-### Saldo & Spending Calculation
-Active balance (saldo) is calculated dynamically from the income minus total spending:
+### Balance and Saldo Calculation
+The active balance (saldo) is calculated dynamically. We sum up the transactions and subtract them from income. 
+But if the category is 'Savings', we treat it differently. Here is the code in `app.py`:
 ```python
 total_spent = sum(t['amount'] if t.get('category') != 'Savings' else -t['amount'] for t in transactions)
 saldo = income - total_spent
 ```
-*Note: Transactions in the 'Savings' category are treated as positive returns to saldo or savings fund allocation, while other categories deduct from the balance.*
+*Note: Transactions with category 'Savings' do not reduce the active balance.*
 
 ### Goal Completion
-When a savings goal is marked as finished, the system deletes the goal from the JSON database and saves a new transaction of category `Needs` with the goal's target amount. This reduces the user's active saldo automatically to show the money has been spent.
+When the user clicks the "Finish Goal" button, the app does two things:
+1. Deletes the goal from the JSON file.
+2. Automatically creates a new transaction under category `Needs` with the goal's target amount. This is to reduce the active balance so it shows the money is actually spent.
 
 ### Chart Rendering
-The file `utils/visualization_utils.py` uses Matplotlib to generate charts, saving them into memory buffers as PNG and encoding to Base64 so they can be injected directly into `<img>` tags on the dashboard:
+The file `utils/visualization_utils.py` uses Matplotlib to generate pie charts and bar charts. It saves the charts as PNG images directly into the static folder:
 ```python
-buf = io.BytesIO()
-plt.savefig(buf, format='png', bbox_inches='tight')
-buf.seek(0)
-image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+img_path = os.path.join(STATIC_IMG_DIR, 'expense_pie.png')
+plt.savefig(img_path)
+plt.close()
 ```
+Then, the frontend page displays these images using standard Flask `url_for('static', filename=...)`.
 
-## 5. Setup and Running
-1. Rename `.env.example` to `.env` and configure your API key.
-2. Install Python packages: `pip install -r requirements.txt`
-3. Run the application: `python app.py`
-4. Access the site locally at `http://127.0.0.1:5000`
+## 5. Setup and How to Run
+1. Copy `.env.example` file and rename it to `.env`.
+2. Open `.env` and fill the `GEMINI_API_KEY` with your Gemini API key.
+3. Install the python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the backend app:
+   ```bash
+   python app.py
+   ```
+5. Open your web browser and go to: `http://127.0.0.1:5000`
