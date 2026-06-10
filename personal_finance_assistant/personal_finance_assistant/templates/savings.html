@@ -1,0 +1,157 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="display: flex; flex-wrap: wrap; gap: 2em;">
+    <!-- Add Goal Card -->
+    <div style="flex: 1; min-width: 300px;">
+        <div class="card" style="padding: 2em; border-radius: 12px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h3 style="margin-top: 0; margin-bottom: 1.5em; font-size: 1.5em; letter-spacing: 0.5px;">Add Savings Goal</h3>
+            <form action="/savings" method="POST">
+                <div style="margin-bottom: 1.5em;">
+                    <label style="font-weight: bold; margin-bottom: 0.5em; display: block;">Goal Name</label>
+                    <input type="text" name="goal_name" placeholder="e.g. Emergency Fund or New House" required style="width: 100%; padding: 0.8em; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff;">
+                </div>
+                
+                <div style="margin-bottom: 1.5em;">
+                    <label style="font-weight: bold; margin-bottom: 0.5em; display: block;">Target Amount (Rp)</label>
+                    <input type="number" name="target_amount" placeholder="e.g. 50000000" required style="width: 100%; padding: 0.8em; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff;">
+                </div>
+                
+
+                
+                <div style="margin-bottom: 1.5em;">
+                    <label style="font-weight: bold; margin-bottom: 0.5em; display: block;">Target Date</label>
+                    <input type="date" name="target_date" required style="width: 100%; padding: 0.8em; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 0.8em; font-size: 1.1em; border-radius: 6px; border: none; background: #4db6ac; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s;">Add Goal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Savings Goals List -->
+    <div style="flex: 2; min-width: 300px;">
+        <div class="card" style="padding: 2em; border-radius: 12px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h3 style="margin-top: 0; margin-bottom: 1.5em; font-size: 1.5em; letter-spacing: 0.5px;">Savings Goals</h3>
+            
+            {% if goals %}
+                {% for goal in goals %}
+                {% set pct = (goal.current_amount / goal.target_amount * 100) | round | int %}
+                {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+                <div style="margin-bottom: 2em; padding: 1.5em; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                        <h4 style="margin: 0; font-size: 1.25em; color: #fff;">{{ goal.goal_name }}</h4>
+                        <span style="font-size: 0.9em; color: rgba(255,255,255,0.5);">Target: {{ goal.target_date }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95em; margin-bottom: 0.8em;">
+                        <span style="color: #4db6ac; font-weight: bold;">Rp {{ "{:,.0f}".format(goal.current_amount).replace(",", ".") }}</span>
+                        <span style="color: rgba(255,255,255,0.7);">of Rp {{ "{:,.0f}".format(goal.target_amount).replace(",", ".") }} ({{ pct }}%)</span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-bottom: 1.2em; overflow: hidden;">
+                        <div style="width: {{ pct }}%; height: 100%; background: linear-gradient(90deg, #4db6ac, #00acc1); border-radius: 5px;"></div>
+                    </div>
+                    
+                    <!-- Action -->
+                    <div style="display: flex; gap: 1em; align-items: center; flex-wrap: wrap;">
+                        <button class="guidance-btn" data-index="{{ loop.index0 }}" style="padding: 0.6em 1.2em; font-size: 0.9em; border-radius: 6px; border: none; background: #9c27b0; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; gap: 0.5em; height: auto !important; line-height: normal !important;">
+                            <i class="fas fa-chart-line"></i> Get AI Investment Guidance
+                        </button>
+                        
+                        {% if pct >= 100 %}
+                        <form action="/complete-goal/{{ loop.index0 }}" method="POST" style="margin: 0;">
+                            <button type="submit" style="padding: 0.6em 1.2em; font-size: 0.9em; border-radius: 6px; border: none; background: #2ecc71; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; gap: 0.5em; height: auto !important; line-height: normal !important;">
+                                <i class="fas fa-check-circle"></i> Finish Goal
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Guidance Display Container -->
+                    <div id="guidance-box-{{ loop.index0 }}" style="display: none; margin-top: 1.5em; padding: 1.5em; border-radius: 6px; background: rgba(156, 39, 176, 0.1); border-left: 4px solid #9c27b0; color: #fff; font-size: 0.95em; line-height: 1.6;">
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: rgba(255,255,255,0.5); text-align: center; margin-top: 3em;">You haven't set any savings goals yet. Add one on the left to start planning!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.guidance-btn');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const idx = this.getAttribute('data-index');
+            const guidanceBox = document.getElementById(`guidance-box-${idx}`);
+            
+            if (guidanceBox.style.display === 'block') {
+                guidanceBox.style.display = 'none';
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating strategies...';
+            
+            fetch(`/api/savings-guidance/${idx}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.guidance) {
+                        // We use a simple markdown parser to render guidance html
+                        guidanceBox.innerHTML = parseMarkdown(data.guidance);
+                        guidanceBox.style.display = 'block';
+                    } else if (data.error) {
+                        guidanceBox.innerHTML = `<p style="color: #ff8a65;">Error: ${data.error}</p>`;
+                        guidanceBox.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    guidanceBox.innerHTML = '<p style="color: #ff8a65;">Failed to load guidance.</p>';
+                    guidanceBox.style.display = 'block';
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-chart-line"></i> Get AI Investment Guidance';
+                });
+        });
+    });
+    
+    function parseMarkdown(text) {
+        if (!text) return "";
+        let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        const lines = html.split('\n');
+        let inList = false;
+        let newLines = [];
+        
+        for (let line of lines) {
+            let stripped = line.trim();
+            if (stripped.startsWith('* ') || stripped.startsWith('- ')) {
+                if (!inList) {
+                    newLines.push('<ul style="margin-left: 1.5em; list-style-type: disc; margin-bottom: 1em;">');
+                    inList = true;
+                }
+                newLines.push(`<li style="margin-bottom: 0.5em;">${stripped.substring(2)}</li>`);
+            } else {
+                if (inList) {
+                    newLines.push('</ul>');
+                    inList = false;
+                }
+                if (stripped) {
+                    newLines.push(`<p style="margin-bottom: 1em;">${stripped}</p>`);
+                }
+            }
+        }
+        if (inList) {
+            newLines.push('</ul>');
+        }
+        return newLines.join('\n');
+    }
+});
+</script>
+{% endblock %}

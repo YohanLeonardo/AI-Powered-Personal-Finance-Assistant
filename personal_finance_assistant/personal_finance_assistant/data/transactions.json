@@ -1,0 +1,56 @@
+[
+    {
+        "description": "coffee",
+        "amount": 30000.0,
+        "category": "Wants",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "groceries",
+        "amount": 500000.0,
+        "category": "Needs",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "saving",
+        "amount": 100000.0,
+        "category": "Savings",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "toy",
+        "amount": 500000.0,
+        "category": "Wants",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "fuel",
+        "amount": 200000.0,
+        "category": "Needs",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "groceries",
+        "amount": 400000.0,
+        "category": "Needs",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "groceries",
+        "amount": 300000.0,
+        "category": "Needs",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "toy",
+        "amount": 500000.0,
+        "category": "Wants",
+        "date": "2026-06-10"
+    },
+    {
+        "description": "Completed Goal: Wii",
+        "amount": 3000000.0,
+        "category": "Needs",
+        "date": "2026-06-10"
+    }
+]

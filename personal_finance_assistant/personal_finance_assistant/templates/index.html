@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="display: flex; flex-wrap: wrap; gap: 2em;">
+    <div style="flex: 1.2; min-width: 300px;">
+        <div class="card">
+            <h3>Add Transaction</h3>
+            <form action="/add-transaction" method="POST">
+                <label>Description</label>
+                <input type="text" name="description" placeholder="e.g. Coffee" required>
+
+                <label>Amount</label>
+                <input type="number" step="0.01" name="amount" placeholder="0.00" required>
+
+                <label>Category</label>
+                <select name="category">
+                    <option value="Needs">Needs</option>
+                    <option value="Wants">Wants</option>
+                    <option value="Savings">Savings</option>
+                </select>
+
+                <button type="submit">Add</button>
+            </form>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <h3>Balance</h3>
+            <p style="font-size: 2em; font-weight: bold; color: #4db6ac;">Rp {{ "{:,.0f}".format(saldo).replace(",",
+                ".") if saldo else "0" }}</p>
+        </div>
+
+        <div class="card" style="margin-top: 1.5em; border-left: 4px solid #1cb495; text-align: left;">
+            <h3>AI Spending Insights</h3>
+            <div style="font-size: 0.95em; line-height: 1.6; color: rgba(255,255,255,0.85);">
+                {{ insights | markdown | safe if insights else "No insights available yet." }}
+            </div>
+        </div>
+
+        <div style="margin-top: 1.5em; text-align: center;">
+            <a href="/generate-report" target="_blank"
+                style="display: inline-block; width: 100%; padding: 0.8em; background: #9c27b0; color: #fff !important; font-weight: bold; border-radius: 6px; text-decoration: none; border-bottom: none; transition: background 0.3s; text-align: center;">
+                <i class="fas fa-file-alt"></i> Generate Financial Report
+            </a>
+        </div>
+    </div>
+
+    <div style="flex: 1.5; min-width: 300px; display: flex; flex-direction: column;">
+        <div class="card" style="flex: 1; display: flex; flex-direction: column; padding: 1.5em;">
+            <h3 style="margin-bottom: 1em;">Spending Overview</h3>
+            <div
+                style="display: flex; flex-direction: column; gap: 1.5em; align-items: center; justify-content: center; flex: 1;">
+                <div style="width: 100%; text-align: center;">
+                    {% if expense_chart %}
+                    <img src="{{ url_for('static', filename=expense_chart) }}" alt="Expense Chart"
+                        style="width: 83%; max-width: 100%; height: auto; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;">
+                    {% else %}
+                    <p>Add some transactions to see your chart!</p>
+                    {% endif %}
+                </div>
+                <div style="width: 100%; text-align: center;">
+                    {% if budget_chart %}
+                    <img src="{{ url_for('static', filename=budget_chart) }}" alt="Budget Chart"
+                        style="width: 83%; max-width: 100%; height: auto; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;">
+                    {% else %}
+                    <p>Set a budget to see comparison.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

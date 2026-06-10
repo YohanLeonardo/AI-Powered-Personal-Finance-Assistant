@@ -1,0 +1,8 @@
+[
+    {
+        "goal_name": "House",
+        "target_amount": 10000000000.0,
+        "current_amount": 20000000.0,
+        "target_date": "2030-12-30"
+    }
+]

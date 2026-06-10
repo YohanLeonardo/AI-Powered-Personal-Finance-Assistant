@@ -1,0 +1,182 @@
+{% extends "layout.html" %} {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/chatbot.css') }}"
+/>
+
+<div class="chat-layout">
+    <div class="glass-panel chat-main">
+        <h3 class="chat-header">🤖 AI Financial Advisor</h3>
+
+        <div class="chat-thread" id="chat-thread">
+            <div class="chat-bubble bubble-ai">
+                <strong>Welcome!</strong> I'm your personalized financial
+                assistant. I have securely analyzed your current budgets and
+                recent transactions.<br /><br />You can ask me general finance
+                questions, or select a template on the right to simulate a
+                "What-If" scenario!
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            Analyzing your finances...
+        </div>
+
+        <form id="chat-form" class="chat-input-area">
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Type your scenario or question here..."
+                required
+                autocomplete="off"
+            />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <div class="glass-panel chat-sidebar">
+        <h4
+            style="
+                margin-top: 0;
+                padding-bottom: 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            "
+        >
+            Quick Simulations
+        </h4>
+
+        <div
+            class="template-card"
+            onclick="
+                useTemplate(
+                    'What if I buy an item for IDR 10,000,000 using a 12-month installment plan? How does it affect my Wants category limits?',
+                )
+            "
+        >
+            <h4>💳 Installment Purchase</h4>
+            <p>
+                Simulate buying an item on a payment plan against your current budget.
+            </p>
+        </div>
+
+        <div
+            class="template-card"
+            onclick="
+                useTemplate(
+                    'I want to plan a trip or make a large one-time purchase next month costing 5,000,000. Do I have enough room in my budget without touching my savings?',
+                )
+            "
+        >
+            <h4>🛍️ Large Purchase</h4>
+            <p>Calculate the cash flow impact of a major one-time expense.</p>
+        </div>
+
+        <div
+            class="template-card"
+            onclick="
+                useTemplate(
+                    'What if my monthly income changes? If my income decreases by 15%, can I still meet my basic Needs and Savings goals?',
+                )
+            "
+        >
+            <h4>📉 Income Change</h4>
+            <p>
+                Evaluate your budget resilience against changes in monthly income.
+            </p>
+        </div>
+
+        <div
+            class="template-card"
+            onclick="
+                useTemplate(
+                    'Analyze my recent transactions and tell me where I am spending the most. Give me actionable tips to optimize my expenses.',
+                )
+            "
+        >
+            <h4>📊 Spending Audit</h4>
+            <p>Get a critical AI critique of your recent spending habits.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configure marked.js to render tables and line breaks properly
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+    })
+
+    const chatThread = document.getElementById('chat-thread')
+    const chatForm = document.getElementById('chat-form')
+    const userInput = document.getElementById('user-input')
+    const typingIndicator = document.getElementById('typing-indicator')
+
+    // Helper function to append bubbles to the chat
+    function appendMessage(sender, text, isMarkdown = false) {
+        const bubble = document.createElement('div')
+        bubble.classList.add('chat-bubble')
+        bubble.classList.add(sender === 'user' ? 'bubble-user' : 'bubble-ai')
+
+        if (isMarkdown) {
+            bubble.innerHTML = marked.parse(text)
+        } else {
+            bubble.textContent = text
+        }
+
+        chatThread.appendChild(bubble)
+        chatThread.scrollTop = chatThread.scrollHeight // Auto-scroll to bottom
+    }
+
+    // Triggered when a sidebar card is clicked
+    function useTemplate(templateText) {
+        userInput.value = templateText
+        userInput.focus()
+    }
+
+    // Intercept form submission to use fetch API
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault()
+
+        const message = userInput.value.trim()
+        if (!message) return
+
+        // 1. Display user message
+        appendMessage('user', message)
+        userInput.value = ''
+
+        // 2. Show loading state
+        typingIndicator.style.display = 'block'
+        chatThread.scrollTop = chatThread.scrollHeight
+
+        try {
+            // 3. Send JSON request to the Flask backend
+            const response = await fetch('/ai-advisor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            })
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`)
+            }
+
+            const data = await response.json()
+
+            // 4. Hide loading and render AI Markdown response
+            typingIndicator.style.display = 'none'
+            appendMessage('ai', data.response, true)
+        } catch (error) {
+            typingIndicator.style.display = 'none'
+            appendMessage(
+                'ai',
+                '**System Error:** Unable to reach the backend service. Check your console logs.',
+                true,
+            )
+            console.error('Fetch error:', error)
+        }
+    })
+</script>
+{% endblock %}

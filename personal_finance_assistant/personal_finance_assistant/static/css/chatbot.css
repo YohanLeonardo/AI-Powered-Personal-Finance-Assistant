@@ -1,0 +1,233 @@
+/* ============================================================================
+   CHATBOT STYLES
+   ============================================================================ */
+
+/* Premium Glassmorphism Styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  color: #f8f9fa;
+}
+
+.chat-layout {
+  display: flex;
+  gap: 20px;
+  max-width: 1450px;
+  width: 96%;
+  margin: 0 auto;
+  height: 82vh;
+}
+
+/* Main Chat Area */
+.chat-main {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  margin-top: 0;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.chat-thread {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-right: 10px;
+  margin-bottom: 15px;
+}
+
+/* Custom Scrollbar for Chat */
+.chat-thread::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-thread::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.chat-thread::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Chat Bubbles */
+.chat-bubble {
+  max-width: 85%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.bubble-user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble-ai {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 4px;
+}
+
+/* Markdown Styling inside AI Bubbles */
+.bubble-ai p {
+  margin: 0 0 10px 0;
+}
+
+.bubble-ai p:last-child {
+  margin: 0;
+}
+
+.bubble-ai strong {
+  color: #5bc0de;
+}
+
+.bubble-ai table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bubble-ai th,
+.bubble-ai td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  text-align: left;
+}
+
+.bubble-ai th {
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.bubble-ai ul,
+.bubble-ai ol {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.bubble-ai li {
+  margin-bottom: 5px;
+}
+
+/* Input Area */
+.chat-input-area {
+  display: flex;
+  gap: 12px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.chat-input-area input:focus {
+  border-color: #5bc0de;
+}
+
+.chat-input-area button {
+  padding: 0 24px;
+  border-radius: 12px;
+  border: none;
+  background: #5bc0de;
+  color: #111;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+
+.chat-input-area button:hover {
+  background: #46b8da;
+  transform: translateY(-2px);
+}
+
+/* Sidebar Area */
+.chat-sidebar {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.template-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.template-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.template-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #bbb;
+  line-height: 1.4;
+}
+
+.typing-indicator {
+  display: none;
+  align-self: flex-start;
+  color: #5bc0de;
+  font-style: italic;
+  font-size: 0.9rem;
+  margin: 0 0 10px 10px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}

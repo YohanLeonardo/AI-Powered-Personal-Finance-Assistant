@@ -1,0 +1,13 @@
+# Ignore environment variables file (sensitive data)
+.env
+personal_finance_assistant/personal_finance_assistant/.env
+
+# Ignore Python compiled/cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local system files
+.DS_Store
+Thumbs.db

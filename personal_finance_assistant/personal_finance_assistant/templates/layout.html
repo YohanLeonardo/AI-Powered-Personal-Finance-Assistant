@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>AI Finance Assistant</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/main.css') }}"
+        />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/fontawesome-all.min.css') }}"
+        />
+        <noscript>
+            <link
+                rel="stylesheet"
+                href="{{ url_for('static', filename='css/noscript.css') }}"
+            />
+        </noscript>
+    </head>
+    <body class="is-preload">
+        <div id="bg">
+            <div class="visible"></div>
+        </div>
+
+        <header id="header">
+            <h1>AI Finance Assistant</h1>
+            <p>Manage your money with the power of AI.</p>
+        </header>
+
+        <div id="main-container">
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/budget" class="nav-link">Budget Planner</a>
+                <a href="/savings" class="nav-link">Savings Planner</a>
+                <a href="/ai-advisor" class="nav-link">AI Advisor</a>
+            </nav>
+
+            {% with messages = get_flashed_messages() %} {% if messages %} {%
+            for message in messages %}
+            <div class="alert">{{ message }}</div>
+            {% endfor %} {% endif %} {% endwith %} {% block content %}{%
+            endblock %}
+        </div>
+
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        <script>
+            document.querySelectorAll('.nav-link').forEach((link) => {
+                if (link.href === window.location.href) {
+                    link.classList.add('active')
+                }
+            })
+        </script>
+    </body>
+</html>

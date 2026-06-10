@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div class="card" style="padding: 2em; border-radius: 12px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);">
+            <h3 style="margin-top: 0; margin-bottom: 1.5em; font-size: 1.5em; letter-spacing: 0.5px;">Set Monthly Budget</h3>
+            <form action="/budget" method="POST">
+                <div style="margin-bottom: 1.5em; display: flex; gap: 1em; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="font-weight: bold; margin-bottom: 0.5em; display: block;">Monthly Income</label>
+                        <input type="number" name="income" id="income-input" placeholder="e.g. 10000000" style="width: 100%; padding: 0.8em; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: #fff; font-size: 1.1em;" value="{{ budgets.get('income', '') | int if budgets.get('income') else '' }}">
+                    </div>
+                    <button type="button" id="ai-recommend-btn" style="padding: 0.8em 1.2em; font-size: 1.1em; border-radius: 6px; border: 1px solid transparent; background: #1cb495; color: #fff; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5em; white-space: nowrap; transition: background 0.3s; height: auto !important; line-height: normal !important;">
+                        <i class="fas fa-magic"></i> Get AI Recommendation
+                    </button>
+                </div>
+                <div id="ai-rationale" style="display: none; padding: 1em; border-radius: 6px; background: rgba(156, 39, 176, 0.1); border-left: 4px solid #9c27b0; margin-bottom: 1.5em; font-size: 0.9em; font-style: italic; color: #e1bee7;"></div>
+                
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.15); margin: 1.5em 0;">
+                
+                <!-- Needs Slider & Value Display -->
+                <div style="margin-bottom: 1.5em;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                        <label style="margin: 0; font-weight: 500;">Needs (<span id="needs-pct">50</span>%)</label>
+                        <span id="needs-val" style="font-weight: bold; font-size: 1.1em; color: #ffdd67;">Rp 0</span>
+                    </div>
+                    <input type="range" id="needs-slider" min="0" max="100" value="50" style="width: 100%; accent-color: #ffdd67; cursor: pointer;">
+                    <input type="hidden" name="Needs" id="needs-input" value="{{ budgets.get('Needs', 0) }}">
+                </div>
+                
+                <!-- Wants Slider & Value Display -->
+                <div style="margin-bottom: 1.5em;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                        <label style="margin: 0; font-weight: 500;">Wants (<span id="wants-pct">30</span>%)</label>
+                        <span id="wants-val" style="font-weight: bold; font-size: 1.1em; color: #ff8a65;">Rp 0</span>
+                    </div>
+                    <input type="range" id="wants-slider" min="0" max="100" value="30" style="width: 100%; accent-color: #ff8a65; cursor: pointer;">
+                    <input type="hidden" name="Wants" id="wants-input" value="{{ budgets.get('Wants', 0) }}">
+                </div>
+                
+                <!-- Savings Slider & Value Display -->
+                <div style="margin-bottom: 1.5em;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                        <label style="margin: 0; font-weight: 500;">Savings (<span id="savings-pct">20</span>%)</label>
+                        <span id="savings-val" style="font-weight: bold; font-size: 1.1em; color: #4db6ac;">Rp 0</span>
+                    </div>
+                    <input type="range" id="savings-slider" min="0" max="100" value="20" style="width: 100%; accent-color: #4db6ac; cursor: pointer;">
+                    <input type="hidden" name="Savings" id="savings-input" value="{{ budgets.get('Savings', 0) }}">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 0.8em; font-size: 1.1em; border-radius: 6px; border: none; background: #4db6ac; color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s;">Save Budget</button>
+            </form>
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const incomeInput = document.getElementById('income-input');
+    const needsSlider = document.getElementById('needs-slider');
+    const wantsSlider = document.getElementById('wants-slider');
+    const savingsSlider = document.getElementById('savings-slider');
+
+    // Retrieve initial values from Python template variables
+    const initialIncome = parseFloat("{{ budgets.get('income', '') }}") || 0;
+    const initialNeeds = parseFloat("{{ budgets.get('Needs', 0) }}") || 0;
+    const initialWants = parseFloat("{{ budgets.get('Wants', 0) }}") || 0;
+    const initialSavings = parseFloat("{{ budgets.get('Savings', 0) }}") || 0;
+
+    let pNeeds = 50;
+    let pWants = 30;
+    let pSavings = 20;
+
+    if (initialIncome > 0) {
+        pNeeds = Math.round((initialNeeds / initialIncome) * 100);
+        pWants = Math.round((initialWants / initialIncome) * 100);
+        pSavings = 100 - pNeeds - pWants;
+        // Check bounds
+        if (pSavings < 0) pSavings = 0;
+    }
+
+    // Set initial slider values
+    needsSlider.value = pNeeds;
+    wantsSlider.value = pWants;
+    savingsSlider.value = pSavings;
+
+    function formatCurrency(value) {
+        return 'Rp ' + Math.round(value).toLocaleString('id-ID');
+    }
+
+    function updateValues() {
+        const income = parseFloat(incomeInput.value) || 0;
+        
+        const pctNeeds = parseInt(needsSlider.value);
+        const pctWants = parseInt(wantsSlider.value);
+        const pctSavings = parseInt(savingsSlider.value);
+        
+        document.getElementById('needs-pct').textContent = pctNeeds;
+        document.getElementById('wants-pct').textContent = pctWants;
+        document.getElementById('savings-pct').textContent = pctSavings;
+        
+        const valNeeds = (income * pctNeeds) / 100;
+        const valWants = (income * pctWants) / 100;
+        const valSavings = (income * pctSavings) / 100;
+        
+        document.getElementById('needs-val').textContent = formatCurrency(valNeeds);
+        document.getElementById('wants-val').textContent = formatCurrency(valWants);
+        document.getElementById('savings-val').textContent = formatCurrency(valSavings);
+        
+        document.getElementById('needs-input').value = valNeeds;
+        document.getElementById('wants-input').value = valWants;
+        document.getElementById('savings-input').value = valSavings;
+    }
+
+    function adjustSliders(changedSlider) {
+        let pctNeeds = parseInt(needsSlider.value);
+        let pctWants = parseInt(wantsSlider.value);
+        let pctSavings = parseInt(savingsSlider.value);
+        
+        if (changedSlider === 'Needs') {
+            let remaining = 100 - pctNeeds;
+            let sumOthers = pctWants + pctSavings;
+            if (sumOthers > 0) {
+                pctWants = Math.round(remaining * (pctWants / sumOthers));
+                pctSavings = remaining - pctWants;
+            } else {
+                pctWants = Math.round(remaining / 2);
+                pctSavings = remaining - pctWants;
+            }
+        } else if (changedSlider === 'Wants') {
+            let remaining = 100 - pctWants;
+            let sumOthers = pctNeeds + pctSavings;
+            if (sumOthers > 0) {
+                pctNeeds = Math.round(remaining * (pctNeeds / sumOthers));
+                pctSavings = remaining - pctNeeds;
+            } else {
+                pctNeeds = Math.round(remaining / 2);
+                pctSavings = remaining - pctNeeds;
+            }
+        } else if (changedSlider === 'Savings') {
+            let remaining = 100 - pctSavings;
+            let sumOthers = pctNeeds + pctWants;
+            if (sumOthers > 0) {
+                pctNeeds = Math.round(remaining * (pctNeeds / sumOthers));
+                pctWants = remaining - pctNeeds;
+            } else {
+                pctNeeds = Math.round(remaining / 2);
+                pctWants = remaining - pctNeeds;
+            }
+        }
+        
+        // Clamp and re-verify sum
+        pctNeeds = Math.max(0, Math.min(100, pctNeeds));
+        pctWants = Math.max(0, Math.min(100, pctWants));
+        pctSavings = Math.max(0, Math.min(100, pctSavings));
+        
+        let currentSum = pctNeeds + pctWants + pctSavings;
+        if (currentSum !== 100) {
+            let diff = 100 - currentSum;
+            if (changedSlider !== 'Needs' && pctNeeds + diff >= 0 && pctNeeds + diff <= 100) {
+                pctNeeds += diff;
+            } else if (changedSlider !== 'Wants' && pctWants + diff >= 0 && pctWants + diff <= 100) {
+                pctWants += diff;
+            } else if (changedSlider !== 'Savings' && pctSavings + diff >= 0 && pctSavings + diff <= 100) {
+                pctSavings += diff;
+            }
+        }
+        
+        needsSlider.value = pctNeeds;
+        wantsSlider.value = pctWants;
+        savingsSlider.value = pctSavings;
+        
+        updateValues();
+    }
+
+    const aiRecommendBtn = document.getElementById('ai-recommend-btn');
+    const aiRationaleDiv = document.getElementById('ai-rationale');
+
+    aiRecommendBtn.addEventListener('click', function() {
+        const income = parseFloat(incomeInput.value);
+        if (!income || income <= 0) {
+            alert('Please enter a valid monthly income first.');
+            return;
+        }
+
+        aiRecommendBtn.disabled = true;
+        aiRecommendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting suggestion...';
+        
+        fetch(`/api/recommend-budget?income=${income}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.Needs !== undefined && data.Wants !== undefined && data.Savings !== undefined) {
+                    needsSlider.value = data.Needs;
+                    wantsSlider.value = data.Wants;
+                    savingsSlider.value = data.Savings;
+                    
+                    if (data.Rationale) {
+                        aiRationaleDiv.textContent = data.Rationale;
+                        aiRationaleDiv.style.display = 'block';
+                    } else {
+                        aiRationaleDiv.style.display = 'none';
+                    }
+                    
+                    updateValues();
+                } else if (data.error) {
+                    alert('Error from AI: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Failed to contact AI service.');
+            })
+            .finally(() => {
+                aiRecommendBtn.disabled = false;
+                aiRecommendBtn.innerHTML = '<i class="fas fa-magic"></i> Get AI Recommendation';
+            });
+    });
+
+    incomeInput.addEventListener('input', updateValues);
+    needsSlider.addEventListener('input', () => adjustSliders('Needs'));
+    wantsSlider.addEventListener('input', () => adjustSliders('Wants'));
+    savingsSlider.addEventListener('input', () => adjustSliders('Savings'));
+
+    // Run initially
+    updateValues();
+});
+</script>
+{% endblock %}

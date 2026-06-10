@@ -1,0 +1,12 @@
+# Ignore environment variables file (sensitive data)
+.env
+
+# Ignore Python compiled/cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local system files
+.DS_Store
+Thumbs.db
